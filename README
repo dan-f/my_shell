@@ -1,0 +1,67 @@
+--------------------------------------------------------------------------------
+Daniel Friedman
+Fall 2012
+
+I affirm that I have adhered to the Honor Code in this assignment
+-----------------------------------------------------------------
+
+GENERAL
+-------
+I have included two versions of my shell, run_shell, and run_shell_rl.
+run_shell_rl is a readline version of my shell; that is, it uses the readline
+library for editing command-line input, and also recalling commands from
+history. Both versions have been tested on (and written for) the linux lab
+machines. I have paid close attention to prevent all memory leakage, and to make
+responsible calls to tokenize. Files util.{c,h} provided by Prof Steven Crain.
+
+LINE-HANDLING
+-------------
+Input to run_shell is gracefully handled in the (you guessed it...) handle_line
+function. handle_line counts the number of 'command-chunks', or, number of
+commands in the pipe-line. Then, for each chunk, the number of tokens are
+correctly counted, and a command struct (containing an argv and argc) is created
+for each command in the pipeline. Therefore, when tokenize is called, it is
+given a correctly-sized argv (argc + 1 so it can be NULL terminated) and the
+maxargs parameter is set to the exact number of args given to the command. This
+way, no space is wasted through estimation or compromise.
+
+Additional whitespace in the command-line input is ignored (does not cause
+problems).
+
+MEMORY
+------
+run_shell runs cleanly; if inspected by valgrind, it can be seen that no memory
+is leaked. run_shell_rl is also mostly clean (I free all my mallocs). However,
+due to the readline library, valgrind reports that, while we have no leaks,
+there are a certain number of bytes "still reachable". I have looked up this
+issue online, and it is very common, which is why I believe it to be caused by
+readline.
+
+PIPING
+------
+Infinite piping has been implemented. The user may insert a space character
+before or after the pipe, but it is not necessary. Piping handles syntax errors.
+For example, commands such as:
+    ls | grep run < foo
+are ignored due to ambiguous I/O, as are commands such as:
+    cat foo > bar | grep run
+
+FILE REDIRECTION
+----------------
+File redirection has been implemented in both directions (> and <). Furthermore,
+it is elegantly handled by the start_prog wrapper function, so that it is
+handled as part of the pipeline. For example, a command like:
+    ls | grep run > output
+works, as does:
+    cat < foo | grep bar
+
+SIGNALS
+-------
+SIGTSTP has been handled (control-z). It takes a foreground process, and runs it
+in the background.
+
+BUGS
+----
+None known.
+
+--------------------------------------------------------------------------------
